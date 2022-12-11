@@ -11,8 +11,5 @@ class GLWindow : public QOpenGLWindow, protected QOpenGLFunctions
 public:
     GLWindow();
     ~GLWindow();
-
-protected:
-
 };
 #endif // GLWINDOW_H
