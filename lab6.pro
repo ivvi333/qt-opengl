@@ -21,4 +21,9 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
-    .gitignore
+    .gitignore \
+    testFShader.frag \
+    testVShader.vert
+
+RESOURCES += \
+    resources.qrc

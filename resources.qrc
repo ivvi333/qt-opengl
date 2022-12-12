@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/" lang="GLSL">
+        <file>testFShader.frag</file>
+        <file>testVShader.vert</file>
+    </qresource>
+</RCC>
