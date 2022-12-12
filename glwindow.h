@@ -3,15 +3,37 @@
 
 #include <QOpenGLWindow>
 #include <QOpenGLFunctions>
-#include <QOpenGLVertexArrayObject>
-#include <QOpenGLBuffer>
+#include <QMatrix4x4>
+#include <QOpenGLShaderProgram>
+#include <QMouseEvent>
+#include <QWheelEvent>
+#include <QKeyEvent>
 
 class GLWindow : public QOpenGLWindow, protected QOpenGLFunctions
 {
     Q_OBJECT
 
-    QOpenGLVertexArrayObject *vao;
-    QOpenGLBuffer *vbo;
+    float zoffset = 3;
+
+    QPoint lastMousePosition;
+    bool dragging;
+
+    QMatrix4x4 rotateMatrix;
+    QMatrix4x4 modelViewMatrix;
+    QMatrix4x4 projectMatrix;
+
+    QOpenGLShaderProgram quadShaderProgram;
+
+    void resetProjection();
+    void resetModelView();
+    static void changeRotateMatrix(QMatrix4x4& rotate_matrix, float dx, float dy);
+
+    virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual void mouseMoveEvent(QMouseEvent *event) override;
+    virtual void mouseReleaseEvent(QMouseEvent *event) override;
+    virtual void wheelEvent(QWheelEvent *event) override;
+
+    void initShader();
 
 public:
     GLWindow();

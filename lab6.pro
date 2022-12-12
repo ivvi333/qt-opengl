@@ -22,8 +22,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 DISTFILES += \
     .gitignore \
-    testFShader.frag \
-    testVShader.vert
+    testFShader.frag
 
 RESOURCES += \
     resources.qrc
