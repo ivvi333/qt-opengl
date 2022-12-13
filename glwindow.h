@@ -24,6 +24,9 @@ class GLWindow : public QOpenGLWindow, protected QOpenGLFunctions
 
     QOpenGLShaderProgram quadShaderProgram;
 
+    std::unique_ptr<QVector3D[]> platform;
+    std::vector<std::unique_ptr<QVector3D[]>> trees;
+
     void resetProjection();
     void resetModelView();
     static void changeRotateMatrix(QMatrix4x4& rotate_matrix, float dx, float dy);
@@ -34,6 +37,9 @@ class GLWindow : public QOpenGLWindow, protected QOpenGLFunctions
     virtual void wheelEvent(QWheelEvent *event) override;
 
     void initShader();
+
+    void drawPlatform();
+    void drawTrees();
 
 public:
     GLWindow();
