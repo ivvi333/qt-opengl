@@ -25,38 +25,45 @@ public:
 };
 
 class House {
-    std::vector<std::unique_ptr<QVector3D[]>> houseWalls;
+    std::unique_ptr<QVector3D[]> houseBase;
+    QVector3D houseBaseColor;
     std::vector<std::unique_ptr<QVector3D[]>> houseRoof;
+    QVector3D houseRoofColor;
     int type;
 
 public:
     House(int type, float width, float length, float height, float x, float y, float z);
+    QVector3D* getHouseBase() const { return houseBase.get(); }
+    QVector3D getHouseBaseColor() const { return houseBaseColor; }
+    std::vector<std::unique_ptr<QVector3D[]>> const& getHouseRoof() const { return houseRoof; }
+    QVector3D getHouseRoofColor() const { return houseRoofColor; }
 };
 
 class GLWindow : public QOpenGLWindow, protected QOpenGLFunctions
 {
     Q_OBJECT
-
-    float zoffset = 3;
-
     QPointF lastMousePosition;
     bool dragging;
 
     QMatrix4x4 rotateMatrix;
+    float angle = 30.0;
     QMatrix4x4 modelViewMatrix;
     QMatrix4x4 projectMatrix;
 
     QOpenGLShaderProgram quadShaderProgram;
 
-    const float platformW = 1000.0, platformL = 1000.0, platformH = 10.0;
+    const float platformW = 1000.0, platformL = platformW, platformH = 10.0;
     std::unique_ptr<QVector3D[]> platform;
     const float cellW = 50.0, cellL = 50.0;
     std::vector<std::pair<int, int>> freeCells;
+
+    float zoffset = platformW / 8.0;
 
     std::vector<House> houses;
     std::vector<Tree> trees;
 
     void addTree();
+    void addHouse();
 
     void freeAllCells();
 
@@ -74,6 +81,7 @@ class GLWindow : public QOpenGLWindow, protected QOpenGLFunctions
 
     void drawPlatform();
     void drawTrees();
+    void drawHouses();
 
 public:
     GLWindow();
