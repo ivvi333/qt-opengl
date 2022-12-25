@@ -1,7 +1,7 @@
 #version 460 core
 #define MAX_LIGHT_COUNT 4
 
-in vec4 Position;
+in vec3 Position;
 in vec3 Normal;
 
 uniform vec3 ObjectColor;
@@ -10,7 +10,7 @@ out vec4 FragColor;
 
 struct LightInfo
 {
-    vec4 Position;
+    vec3 Position;
     vec3 Intensity;
     float constant;
     float linear;
@@ -24,10 +24,10 @@ uniform vec3 Ka;
 uniform vec3 Ks;
 uniform float Shininess;
 
-vec3 ads(int lightIndex, vec4 position, vec3 norm)
+vec3 ads(int lightIndex, vec3 position, vec3 norm)
 {
-    vec3 s = normalize(vec3(lights[lightIndex].Position - position));
-    vec3 v = normalize(vec3(-position));
+    vec3 s = normalize(lights[lightIndex].Position - position);
+    vec3 v = normalize(-position);
     vec3 r = reflect(-s, norm);
     float distance = length(lights[lightIndex].Position - position);
     float attenuation = 1.0 / (lights[lightIndex].constant + lights[lightIndex].linear * distance +
