@@ -1,9 +1,9 @@
 #version 460 core
 
-in vec4 VertexPosition;
+in vec3 VertexPosition;
 in vec3 VertexNormal;
 
-out vec4 Position;
+out vec3 Position;
 out vec3 Normal;
 
 uniform mat4 ModelViewMatrix;
@@ -13,7 +13,7 @@ uniform mat4 ModelViewProjectionMatrix;
 void main()
 {
     Normal = normalize(NormalMatrix * VertexNormal);
-    Position = ModelViewMatrix * VertexPosition;
+    Position = vec3(ModelViewMatrix * vec4(VertexPosition, 1.0));
 
-    gl_Position = ModelViewProjectionMatrix * VertexPosition;
+    gl_Position = ModelViewProjectionMatrix * vec4(VertexPosition, 1.0);
 }

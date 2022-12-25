@@ -12,62 +12,56 @@
 #define MAX_LAMP_COUNT 4
 
 class Tree {
-    std::unique_ptr<QVector4D[]> treeTrunc;
-    std::unique_ptr<QVector3D[]> treeTruncNorm;
+    std::unique_ptr<QVector3D[]> treeTrunc, treeTruncNorm;
     QVector3D treeTruncColor;
-    std::vector<std::unique_ptr<QVector4D[]>> treeLeaves;
-    std::vector<std::unique_ptr<QVector3D[]>> treeLeavesNorm;
+    std::vector<std::unique_ptr<QVector3D[]>> treeLeaves, treeLeavesNorm;
     QVector3D treeLeavesColor;
     int type;
 
 public:
     Tree(int type, float width, float length, float height, float x, float y, float z);
-    QVector4D* getTreeTrunc() const { return treeTrunc.get(); }
+    QVector3D* getTreeTrunc() const { return treeTrunc.get(); }
     QVector3D* getTreeTruncNorm() const { return treeTruncNorm.get(); }
     QVector3D getTreeTruncColor() const { return treeTruncColor; }
-    std::vector<std::unique_ptr<QVector4D[]>> const& getTreeLeaves() const { return treeLeaves; }
+    std::vector<std::unique_ptr<QVector3D[]>> const& getTreeLeaves() const { return treeLeaves; }
     std::vector<std::unique_ptr<QVector3D[]>> const& getTreeLeavesNorm() const { return treeLeavesNorm; }
     QVector3D getTreeLeavesColor() const { return treeLeavesColor; }
 };
 
 class House {
-    std::unique_ptr<QVector4D[]> houseBase;
-    std::unique_ptr<QVector3D[]> houseBaseNorm;
+    std::unique_ptr<QVector3D[]> houseBase, houseBaseNorm;
     QVector3D houseBaseColor;
-    std::vector<std::unique_ptr<QVector4D[]>> houseRoof;
-    std::vector<std::unique_ptr<QVector3D[]>> houseRoofNorm;
+    std::vector<std::unique_ptr<QVector3D[]>> houseRoof, houseRoofNorm;
     QVector3D houseRoofColor;
     int type;
 
 public:
     House(int type, float width, float length, float height, float x, float y, float z);
-    QVector4D* getHouseBase() const { return houseBase.get(); }
+    QVector3D* getHouseBase() const { return houseBase.get(); }
     QVector3D* getHouseBaseNorm() const { return houseBaseNorm.get(); }
     QVector3D getHouseBaseColor() const { return houseBaseColor; }
-    std::vector<std::unique_ptr<QVector4D[]>> const& getHouseRoof() const { return houseRoof; }
+    std::vector<std::unique_ptr<QVector3D[]>> const& getHouseRoof() const { return houseRoof; }
     std::vector<std::unique_ptr<QVector3D[]>> const& getHouseRoofNorm() const { return houseRoofNorm; }
     QVector3D getHouseRoofColor() const { return houseRoofColor; }
 };
 
 class Lamp {
-    std::unique_ptr<QVector4D[]> pole;
-    std::unique_ptr<QVector3D[]> poleNorm;
+    std::unique_ptr<QVector3D[]> pole, poleNorm;
     QVector3D poleColor;
-    std::unique_ptr<QVector4D[]> head;
-    std::unique_ptr<QVector3D[]> headNorm;
+    std::unique_ptr<QVector3D[]> head, headNorm;
     QVector3D headColor;
 
-    QVector4D getCenter(QVector4D *vertices, int size) const;
+    QVector3D getCenter(QVector3D *vertices, int size) const;
 
 public:
     Lamp(float width, float length, float height, float x, float y, float z);
-    QVector4D* getPole() const { return pole.get(); }
+    QVector3D* getPole() const { return pole.get(); }
     QVector3D* getPoleNorm() const { return poleNorm.get(); }
-    QVector4D getPoleCenter() const { return getCenter(pole.get(), 24); }
+    QVector3D getPoleCenter() const { return getCenter(pole.get(), 24); }
     QVector3D getPoleColor() const { return poleColor; }
-    QVector4D* getHead() const { return head.get(); }
+    QVector3D* getHead() const { return head.get(); }
     QVector3D* getHeadNorm() const { return headNorm.get(); }
-    QVector4D getHeadCenter() const { return getCenter(head.get(), 24); }
+    QVector3D getHeadCenter() const { return getCenter(head.get(), 24); }
     QVector3D getHeadColor() const { return headColor; }
 };
 
@@ -85,13 +79,12 @@ class GLWindow : public QOpenGLWindow, protected QOpenGLFunctions
     QOpenGLShaderProgram quadShaderProgram;
 
     const QVector3D platformColor = QVector3D(200.0/255.0, 210.0/255.0, 195.0/255.0);
-    const float platformW = 1000.0, platformL = platformW, platformH = 10.0;
-    std::unique_ptr<QVector4D[]> platform;
-    std::unique_ptr<QVector3D[]> platformNorm;
-    const float cellW = 50.0, cellL = 50.0;
+    const float platformW = 10000.0, platformL = platformW, platformH = 10.0;
+    std::unique_ptr<QVector3D[]> platform, platformNorm;
+    const float cellW = 50.0, cellL = cellW;
     std::vector<std::pair<int, int>> freeCells;
 
-    float zoffset = platformW / 8.0;
+    float zoffset = platformW / 32.0;
 
     std::vector<House> houses;
     std::vector<Tree> trees;
