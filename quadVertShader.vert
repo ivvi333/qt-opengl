@@ -1,7 +1,19 @@
-attribute vec4 vertex;
-uniform mat4 modelViewProjectionMatrix;
+#version 460 core
 
-void main(void)
+in vec4 VertexPosition;
+in vec3 VertexNormal;
+
+out vec4 Position;
+out vec3 Normal;
+
+uniform mat4 ModelViewMatrix;
+uniform mat3 NormalMatrix;
+uniform mat4 ModelViewProjectionMatrix;
+
+void main()
 {
-    gl_Position = modelViewProjectionMatrix * vertex;
+    Normal = normalize(NormalMatrix * VertexNormal);
+    Position = ModelViewMatrix * VertexPosition;
+
+    gl_Position = ModelViewProjectionMatrix * VertexPosition;
 }

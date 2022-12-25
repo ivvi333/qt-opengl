@@ -1,46 +1,52 @@
 #include "glwindow.h"
 
 #include <random>
+#include <sstream>
 
-void getQuadVertices(QVector3D *vertices, float width, float length, float height, float x, float y, float z)
+void getQuadVertices(QVector4D *vertices, float width, float length, float height, float x, float y, float z)
 {
     float hw = width / 2, hl = length / 2, hh = height / 2;
 
     // Передняя грань
-    vertices[0] = { x - hw, y + hl, z + hh };
-    vertices[1] = { x - hw, y - hl, z + hh };
-    vertices[2] = { x + hw, y - hl, z + hh };
-    vertices[3] = { x + hw, y + hl, z + hh };
+    vertices[0] = { x - hw, y + hl, z + hh, 1.0 };
+    vertices[1] = { x - hw, y - hl, z + hh, 1.0 };
+    vertices[2] = { x + hw, y - hl, z + hh, 1.0 };
+    vertices[3] = { x + hw, y + hl, z + hh, 1.0 };
 
     // Задняя грань
-    vertices[4] = { x + hw, y + hl, z - hh };
-    vertices[5] = { x + hw, y - hl, z - hh };
-    vertices[6] = { x - hw, y - hl, z - hh };
-    vertices[7] = { x - hw, y + hl, z - hh };
+    vertices[4] = { x + hw, y + hl, z - hh, 1.0 };
+    vertices[5] = { x + hw, y - hl, z - hh, 1.0 };
+    vertices[6] = { x - hw, y - hl, z - hh, 1.0 };
+    vertices[7] = { x - hw, y + hl, z - hh, 1.0 };
 
     // Верхняя грань
-    vertices[8] = { x - hw, y + hl, z - hh };
-    vertices[9] = { x - hw, y + hl, z + hh };
-    vertices[10] = { x + hw, y + hl, z + hh };
-    vertices[11] = { x + hw, y + hl, z - hh };
+    vertices[8] = { x - hw, y + hl, z - hh, 1.0 };
+    vertices[9] = { x - hw, y + hl, z + hh, 1.0 };
+    vertices[10] = { x + hw, y + hl, z + hh, 1.0 };
+    vertices[11] = { x + hw, y + hl, z - hh, 1.0 };
 
     // Нижняя грань
-    vertices[12] = { x + hw, y - hl, z - hh };
-    vertices[13] = { x + hw, y - hl, z + hh };
-    vertices[14] = { x - hw, y - hl, z + hh };
-    vertices[15] = { x - hw, y - hl, z - hh };
+    vertices[12] = { x + hw, y - hl, z - hh, 1.0 };
+    vertices[13] = { x + hw, y - hl, z + hh, 1.0 };
+    vertices[14] = { x - hw, y - hl, z + hh, 1.0 };
+    vertices[15] = { x - hw, y - hl, z - hh, 1.0 };
 
     // Правая грань
-    vertices[16] = { x + hw, y - hl, z + hh };
-    vertices[17] = { x + hw, y - hl, z - hh };
-    vertices[18] = { x + hw, y + hl, z - hh };
-    vertices[19] = { x + hw, y + hl, z + hh };
+    vertices[16] = { x + hw, y - hl, z + hh, 1.0 };
+    vertices[17] = { x + hw, y - hl, z - hh, 1.0 };
+    vertices[18] = { x + hw, y + hl, z - hh, 1.0 };
+    vertices[19] = { x + hw, y + hl, z + hh, 1.0 };
 
     // Левая грань
-    vertices[20] = { x - hw, y + hl, z + hh };
-    vertices[21] = { x - hw, y + hl, z - hh };
-    vertices[22] = { x - hw, y - hl, z - hh };
-    vertices[23] = { x - hw, y - hl, z + hh };
+    vertices[20] = { x - hw, y + hl, z + hh, 1.0 };
+    vertices[21] = { x - hw, y + hl, z - hh, 1.0 };
+    vertices[22] = { x - hw, y - hl, z - hh, 1.0 };
+    vertices[23] = { x - hw, y - hl, z + hh, 1.0 };
+}
+
+void getNormals(QVector4D *vertices, QVector3D *norms) {
+    for (int i = 0; i < 24; i++)
+        norms[i] = (vertices[i].normalized()).toVector3DAffine();
 }
 
 Tree::Tree(int type, float width, float length, float height, float x, float y, float z)
@@ -48,8 +54,10 @@ Tree::Tree(int type, float width, float length, float height, float x, float y, 
 {
     treeTruncColor = QVector3D(74.0/255.0, 53.0/255.0, 42.0/255.0);
 
-    treeTrunc = std::make_unique<QVector3D[]>(24);
+    treeTrunc = std::make_unique<QVector4D[]>(24);
+    treeTruncNorm = std::make_unique<QVector3D[]>(24);
     getQuadVertices(treeTrunc.get(), width / 3, length / 3, height - height / 12, x, y, z - height / 24);
+    getNormals(treeTrunc.get(), treeTruncNorm.get());
 
     if (width > length)
         length = width;
@@ -58,27 +66,39 @@ Tree::Tree(int type, float width, float length, float height, float x, float y, 
 
     switch (type) {
     case 1:
-        treeLeavesColor = QVector3D(220.0/255.0, 225.0/255.0, 120.0/255.0);
-        treeLeaves.push_back(std::make_unique<QVector3D[]>(24));
+        treeLeavesColor = QVector3D(148.0/255.0, 124.0/255.0, 27.0/255.0);
+        treeLeaves.push_back(std::make_unique<QVector4D[]>(24));
+        treeLeavesNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(treeLeaves[treeLeaves.size() - 1].get(), width, length, height / 2, x, y, z + height / 4);
+        getNormals(treeLeaves[treeLeaves.size() - 1].get(), treeLeavesNorm[treeLeavesNorm.size() - 1].get());
         break;
 
     case 2:
         treeLeavesColor = QVector3D(40.0/255.0, 80.0/255.0, 25.0/255.0);
-        treeLeaves.push_back(std::make_unique<QVector3D[]>(24));
+        treeLeaves.push_back(std::make_unique<QVector4D[]>(24));
+        treeLeavesNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(treeLeaves[treeLeaves.size() - 1].get(), width, length, 3 * height / 4, x, y, z + height / 8);
+        getNormals(treeLeaves[treeLeaves.size() - 1].get(), treeLeavesNorm[treeLeavesNorm.size() - 1].get());
         break;
 
     case 3:
         treeLeavesColor = QVector3D(20.0/255.0, 35.0/255.0, 20.0/255.0);
-        treeLeaves.push_back(std::make_unique<QVector3D[]>(24));
+        treeLeaves.push_back(std::make_unique<QVector4D[]>(24));
+        treeLeavesNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(treeLeaves[treeLeaves.size() - 1].get(), width, length, height / 6, x, y, z + 5 * height / 12);
-        treeLeaves.push_back(std::make_unique<QVector3D[]>(24));
+        getNormals(treeLeaves[treeLeaves.size() - 1].get(), treeLeavesNorm[treeLeavesNorm.size() - 1].get());
+        treeLeaves.push_back(std::make_unique<QVector4D[]>(24));
+        treeLeavesNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(treeLeaves[treeLeaves.size() - 1].get(), width, length, height / 6, x, y, z + 2 * height / 12);
-        treeLeaves.push_back(std::make_unique<QVector3D[]>(24));
+        getNormals(treeLeaves[treeLeaves.size() - 1].get(), treeLeavesNorm[treeLeavesNorm.size() - 1].get());
+        treeLeaves.push_back(std::make_unique<QVector4D[]>(24));
+        treeLeavesNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(treeLeaves[treeLeaves.size() - 1].get(), width, length, height / 6, x, y, z - height / 12);
-        treeLeaves.push_back(std::make_unique<QVector3D[]>(24));
+        getNormals(treeLeaves[treeLeaves.size() - 1].get(), treeLeavesNorm[treeLeavesNorm.size() - 1].get());
+        treeLeaves.push_back(std::make_unique<QVector4D[]>(24));
+        treeLeavesNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(treeLeaves[treeLeaves.size() - 1].get(), width, length, height / 6, x, y, z - 4 * height / 12);
+        getNormals(treeLeaves[treeLeaves.size() - 1].get(), treeLeavesNorm[treeLeavesNorm.size() - 1].get());
         break;
     }
 }
@@ -88,68 +108,137 @@ House::House(int type, float width, float length, float height, float x, float y
 {
     switch (type) {
     case 1:
-        houseBase = std::make_unique<QVector3D[]>(24);
+        houseBase = std::make_unique<QVector4D[]>(24);
+        houseBaseNorm = std::make_unique<QVector3D[]>(24);
         getQuadVertices(houseBase.get(), width, length, 3 * height / 4, x, y, z - height / 8);
+        getNormals(houseBase.get(), houseBaseNorm.get());
         houseBaseColor = QVector3D(65.0/255.0, 65.0/255.0, 70.0/255.0);
+
         houseRoofColor = QVector3D(94.0/255.0, 94.0/255.0, 102.0/255.0);
-        houseRoof.push_back(std::make_unique<QVector3D[]>(24));
+        houseRoof.push_back(std::make_unique<QVector4D[]>(24));
+        houseRoofNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(houseRoof[houseRoof.size() - 1].get(), width / 4, length / 4, height / 8,
                         x - 3 * width / 8, y - 3 * length / 8, z + 5 * height / 16);
-        houseRoof.push_back(std::make_unique<QVector3D[]>(24));
+        getNormals(houseRoof[houseRoof.size() - 1].get(), houseRoofNorm[houseRoofNorm.size() - 1].get());
+        houseRoof.push_back(std::make_unique<QVector4D[]>(24));
+        houseRoofNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(houseRoof[houseRoof.size() - 1].get(), width / 4, length / 4, height / 8,
                         x - 3 * width / 8, y, z + 5 * height / 16);
-        houseRoof.push_back(std::make_unique<QVector3D[]>(24));
+        getNormals(houseRoof[houseRoof.size() - 1].get(), houseRoofNorm[houseRoofNorm.size() - 1].get());
+        houseRoof.push_back(std::make_unique<QVector4D[]>(24));
+        houseRoofNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(houseRoof[houseRoof.size() - 1].get(), width / 4, length / 4, height / 8,
                         x - 3 * width / 8, y + 3 * length / 8, z + 5 * height / 16);
-        houseRoof.push_back(std::make_unique<QVector3D[]>(24));
+        getNormals(houseRoof[houseRoof.size() - 1].get(), houseRoofNorm[houseRoofNorm.size() - 1].get());
+        houseRoof.push_back(std::make_unique<QVector4D[]>(24));
+        houseRoofNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(houseRoof[houseRoof.size() - 1].get(), width / 4, length / 4, height / 8,
                         x, y - 3 * length / 8, z + 5 * height / 16);
-        houseRoof.push_back(std::make_unique<QVector3D[]>(24));
+        getNormals(houseRoof[houseRoof.size() - 1].get(), houseRoofNorm[houseRoofNorm.size() - 1].get());
+        houseRoof.push_back(std::make_unique<QVector4D[]>(24));
+        houseRoofNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(houseRoof[houseRoof.size() - 1].get(), width / 4, length / 4, height / 8,
                         x, y + 3 * length / 8, z + 5 * height / 16);
-        houseRoof.push_back(std::make_unique<QVector3D[]>(24));
+        getNormals(houseRoof[houseRoof.size() - 1].get(), houseRoofNorm[houseRoofNorm.size() - 1].get());
+        houseRoof.push_back(std::make_unique<QVector4D[]>(24));
+        houseRoofNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(houseRoof[houseRoof.size() - 1].get(), width / 4, length / 4, height / 8,
                         x + 3 * width / 8, y - 3 * length / 8, z + 5 * height / 16);
-        houseRoof.push_back(std::make_unique<QVector3D[]>(24));
+        getNormals(houseRoof[houseRoof.size() - 1].get(), houseRoofNorm[houseRoofNorm.size() - 1].get());
+        houseRoof.push_back(std::make_unique<QVector4D[]>(24));
+        houseRoofNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(houseRoof[houseRoof.size() - 1].get(), width / 4, length / 4, height / 8,
                         x + 3 * width / 8, y, z + 5 * height / 16);
-        houseRoof.push_back(std::make_unique<QVector3D[]>(24));
+        getNormals(houseRoof[houseRoof.size() - 1].get(), houseRoofNorm[houseRoofNorm.size() - 1].get());
+        houseRoof.push_back(std::make_unique<QVector4D[]>(24));
+        houseRoofNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(houseRoof[houseRoof.size() - 1].get(), width / 4, length / 4, height / 8,
                         x + 3 * width / 8, y + 3 * length / 8, z + 5 * height / 16);
+        getNormals(houseRoof[houseRoof.size() - 1].get(), houseRoofNorm[houseRoofNorm.size() - 1].get());
         break;
 
     case 2:
-        houseBase = std::make_unique<QVector3D[]>(24);
+        houseBase = std::make_unique<QVector4D[]>(24);
+        houseBaseNorm = std::make_unique<QVector3D[]>(24);
         getQuadVertices(houseBase.get(), width, length, 5 * height / 8, x, y, z - 3 * height / 16);
+        getNormals(houseBase.get(), houseBaseNorm.get());
         houseBaseColor = QVector3D(225.0/255.0, 215.0/255.0, 155.0/255.0);
         houseRoofColor = QVector3D(195.0/255.0, 55.0/255.0, 55.0/255.0);
-        houseRoof.push_back(std::make_unique<QVector3D[]>(24));
+        houseRoof.push_back(std::make_unique<QVector4D[]>(24));
+        houseRoofNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(houseRoof[houseRoof.size() - 1].get(), width, length, height / 8,
                         x, y, z + 3 * height / 16);
-        houseRoof.push_back(std::make_unique<QVector3D[]>(24));
+        getNormals(houseRoof[houseRoof.size() - 1].get(), houseRoofNorm[houseRoofNorm.size() - 1].get());
+        houseRoof.push_back(std::make_unique<QVector4D[]>(24));
+        houseRoofNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(houseRoof[houseRoof.size() - 1].get(), width / 2, length / 2, height / 8,
                         x, y, z + 5 * height / 16);
-        houseRoof.push_back(std::make_unique<QVector3D[]>(24));
+        getNormals(houseRoof[houseRoof.size() - 1].get(), houseRoofNorm[houseRoofNorm.size() - 1].get());
+        houseRoof.push_back(std::make_unique<QVector4D[]>(24));
+        houseRoofNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(houseRoof[houseRoof.size() - 1].get(), width / 4, length / 4, height / 8,
                         x, y, z + 7 * height / 16);
+        getNormals(houseRoof[houseRoof.size() - 1].get(), houseRoofNorm[houseRoofNorm.size() - 1].get());
         break;
 
     case 3:
-        houseBase = std::make_unique<QVector3D[]>(24);
+        houseBase = std::make_unique<QVector4D[]>(24);
+        houseBaseNorm = std::make_unique<QVector3D[]>(24);
         getQuadVertices(houseBase.get(), width, length, 3 * height / 4, x, y, z - height / 8);
+        getNormals(houseBase.get(), houseBaseNorm.get());
         houseBaseColor = QVector3D(65.0/255.0, 65.0/255.0, 70.0/255.0);
         houseRoofColor = QVector3D(94.0/255.0, 94.0/255.0, 102.0/255.0);
-        houseRoof.push_back(std::make_unique<QVector3D[]>(24));
+        houseRoof.push_back(std::make_unique<QVector4D[]>(24));
+        houseRoofNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(houseRoof[houseRoof.size() - 1].get(), width, length / 4, height / 8,
                         x, y - 3 * length / 8, z + 5 * height / 16);
-        houseRoof.push_back(std::make_unique<QVector3D[]>(24));
+        getNormals(houseRoof[houseRoof.size() - 1].get(), houseRoofNorm[houseRoofNorm.size() - 1].get());
+        houseRoof.push_back(std::make_unique<QVector4D[]>(24));
+        houseRoofNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(houseRoof[houseRoof.size() - 1].get(), width, length / 4, height / 8,
                         x, y, z + 5 * height / 16);
-        houseRoof.push_back(std::make_unique<QVector3D[]>(24));
+        getNormals(houseRoof[houseRoof.size() - 1].get(), houseRoofNorm[houseRoofNorm.size() - 1].get());
+        houseRoof.push_back(std::make_unique<QVector4D[]>(24));
+        houseRoofNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(houseRoof[houseRoof.size() - 1].get(), width, length / 4, height / 8,
                         x, y + 3 * length / 8, z + 5 * height / 16);
+        getNormals(houseRoof[houseRoof.size() - 1].get(), houseRoofNorm[houseRoofNorm.size() - 1].get());
         break;
     }
+}
+
+Lamp::Lamp(float width, float length, float height, float x, float y, float z)
+{
+    poleColor = QVector3D(0.0/255.0, 0.0/255.0, 0.0/255.0);
+    pole = std::make_unique<QVector4D[]>(24);
+    poleNorm = std::make_unique<QVector3D[]>(24);
+    getQuadVertices(pole.get(), width / 3, length / 3, height - height / 3, x, y, z - height / 6);
+    getNormals(pole.get(), poleNorm.get());
+
+    headColor = QVector3D(220.0/255.0, 215.0/255.0, 90.0/255.0);
+    head = std::make_unique<QVector4D[]>(24);
+    headNorm = std::make_unique<QVector3D[]>(24);
+    getQuadVertices(head.get(), width, length, height / 3, x, y, z + height / 3);
+    getNormals(head.get(), headNorm.get());
+}
+
+QVector4D Lamp::getCenter(QVector4D *vertices, int size) const {
+    float xSum, ySum, zSum, x4Sum, y4Sum, z4Sum;
+    xSum = ySum = zSum = 0.0;
+
+    for (int i = 0; i < size / 4; i++) {
+        x4Sum = y4Sum = z4Sum = 0.0;
+        for (int j = i * 4; j < i * 4 + 4; j++) {
+            x4Sum += vertices[i].x() / vertices[i].w();
+            y4Sum += vertices[i].y() / vertices[i].w();
+            z4Sum += vertices[i].z() / vertices[i].w();
+        }
+        xSum += x4Sum;
+        ySum += y4Sum;
+        zSum += z4Sum;
+    }
+
+    return QVector4D(4 * xSum / size, 4 * ySum / size, 4 * zSum / size, 1.0);
 }
 
 void GLWindow::addTree() {
@@ -200,8 +289,8 @@ void GLWindow::addHouse() {
     float minHeight, maxHeight;
     switch (type) {
     case 1:
-        minHeight = 50.0;
-        maxHeight = 140.0;
+        minHeight = 140.0;
+        maxHeight = 200.0;
         break;
     case 2:
         minHeight = 50.0;
@@ -220,6 +309,28 @@ void GLWindow::addHouse() {
                          cellW / 2 + cellW * freeCells[cellIndex].first - platformW / 2,
                          cellL / 2 + cellL * freeCells[cellIndex].second - platformL / 2,
                          platformH / 2 + height / 2));
+
+    freeCells.erase(freeCells.begin() + cellIndex);
+}
+
+void GLWindow::addLamp() {
+    if (lampCount >= MAX_LAMP_COUNT)
+        return;
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    std::uniform_int_distribution<int> cellDis(0, freeCells.size() - 1);
+    int cellIndex = cellDis(gen);
+
+    std::uniform_real_distribution<float> heightDis(70.0, 90.0);
+    float height = heightDis(gen);
+
+    lamps.push_back(Lamp(35.0, 35.0, height,
+                         cellW / 2 + cellW * freeCells[cellIndex].first - platformW / 2,
+                         cellL / 2 + cellL * freeCells[cellIndex].second - platformL / 2,
+                         platformH / 2 + height / 2));
+    lampCount++;
 
     freeCells.erase(freeCells.begin() + cellIndex);
 }
@@ -307,12 +418,17 @@ void GLWindow::keyPressEvent(QKeyEvent *event) {
             freeAllCells();
             trees.clear();
             houses.clear();
+            lamps.clear();
+            lampCount = 0;
+
             std::uniform_int_distribution<int> objectDis(freeCells.size() / 2, freeCells.size());
 
             int objectCount = objectDis(gen);
             for (int i = 0; i < objectCount; i++) {
                 int obj = chanceDis(gen);
-                if (obj >= 95)
+                if (obj == 100 && lampCount < MAX_LAMP_COUNT)
+                    addLamp();
+                else if (obj >= 94)
                     addHouse();
                 else
                     addTree();
@@ -328,16 +444,26 @@ void GLWindow::initShader()
     quadShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/quadFragShader.frag");
     if (quadShaderProgram.link() == false)
         qDebug() << quadShaderProgram.log();
-    quadShaderProgram.enableAttributeArray("vertex");
+
+    quadShaderProgram.bind();
+
+    quadShaderProgram.setUniformValue("Kd", 1.0, 1.0, 1.0);
+    quadShaderProgram.setUniformValue("Ka", 0.1, 0.1, 0.1);
+    quadShaderProgram.setUniformValue("Ks", 1.0, 1.0, 1.0);
+    quadShaderProgram.setUniformValue("Shininess", 180.0f);
 }
 
 
 GLWindow::GLWindow()
 {
-    platform = std::make_unique<QVector3D[]>(24);
+    platform = std::make_unique<QVector4D[]>(24);
+    platformNorm = std::make_unique<QVector3D[]>(24);
     getQuadVertices(platform.get(), platformW, platformL, platformH, 0.0, 0.0, 0.0);
+    getNormals(platform.get(), platformNorm.get());
 
     freeAllCells();
+
+    lampCount = 0;
 }
 
 GLWindow::~GLWindow()
@@ -367,33 +493,61 @@ void GLWindow::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    quadShaderProgram.bind();
+    quadShaderProgram.setUniformValue("ModelViewMatrix", modelViewMatrix);
+    quadShaderProgram.setUniformValue("NormalMatrix", modelViewMatrix.normalMatrix());
+    quadShaderProgram.setUniformValue("ModelViewProjectionMatrix", projectMatrix * modelViewMatrix);
 
-    quadShaderProgram.setUniformValue("modelViewProjectionMatrix", projectMatrix * modelViewMatrix);
+    quadShaderProgram.setUniformValue("LightCount", lampCount);
+    for (int i = 0; i < lampCount; i++) {
+    std::stringstream lampAttributeName;
+        lampAttributeName << "lights[" << i << "].";
+        quadShaderProgram.setUniformValue((lampAttributeName.str() + "Position").c_str(),
+                                          modelViewMatrix.map(lamps[i].getHeadCenter()));
+        quadShaderProgram.setUniformValue((lampAttributeName.str() + "Intensity").c_str(), 1.0, 1.0, 1.0);
+        quadShaderProgram.setUniformValue((lampAttributeName.str() + "constant").c_str(), 1.0f);
+        quadShaderProgram.setUniformValue((lampAttributeName.str() + "linear").c_str(), 0.0f);
+        quadShaderProgram.setUniformValue((lampAttributeName.str() + "quadratic").c_str(), 0.0f);
+    }
 
     drawPlatform();
     drawTrees();
     drawHouses();
+    drawLamps();
 }
 
 void GLWindow::drawPlatform()
 {
-    quadShaderProgram.setUniformValue("objectColor", QVector3D(200.0/255.0, 210.0/255.0, 195.0/255.0));
-    quadShaderProgram.setAttributeArray("vertex", platform.get());
+    quadShaderProgram.setUniformValue("ObjectColor", platformColor);
+    quadShaderProgram.setAttributeArray("VertexPosition", platform.get());
+    quadShaderProgram.setAttributeArray("VertexNormal", platformNorm.get());
+    quadShaderProgram.enableAttributeArray("VertexPosition");
+    quadShaderProgram.enableAttributeArray("VertexNormal");
     glDrawArrays(GL_QUADS, 0, 6*4);
+    quadShaderProgram.disableAttributeArray("VertexPosition");
+    quadShaderProgram.disableAttributeArray("VertexNormal");
 }
 
 void GLWindow::drawTrees()
 {
     for (const auto &tree : trees) {
-        quadShaderProgram.setUniformValue("objectColor", tree.getTreeTruncColor());
-        quadShaderProgram.setAttributeArray("vertex", tree.getTreeTrunc());
+        quadShaderProgram.setUniformValue("ObjectColor", tree.getTreeTruncColor());
+        quadShaderProgram.setAttributeArray("VertexPosition", tree.getTreeTrunc());
+        quadShaderProgram.setAttributeArray("VertexNormal", tree.getTreeTruncNorm());
+        quadShaderProgram.enableAttributeArray("VertexPosition");
+        quadShaderProgram.enableAttributeArray("VertexNormal");
         glDrawArrays(GL_QUADS, 0, 6*4);
+        quadShaderProgram.disableAttributeArray("VertexPosition");
+        quadShaderProgram.disableAttributeArray("VertexNormal");
 
-        quadShaderProgram.setUniformValue("objectColor", tree.getTreeLeavesColor());
-        for (auto &leaf : tree.getTreeLeaves()) {
-            quadShaderProgram.setAttributeArray("vertex", leaf.get());
+        quadShaderProgram.setUniformValue("ObjectColor", tree.getTreeLeavesColor());
+        for (int i = 0; i < tree.getTreeLeaves().size(); i++) {
+            quadShaderProgram.setAttributeArray("VertexPosition", tree.getTreeLeaves()[i].get());
+            quadShaderProgram.setAttributeArray("VertexNormal", tree.getTreeLeavesNorm()[i].get());
+            quadShaderProgram.enableAttributeArray("VertexPosition");
+            quadShaderProgram.enableAttributeArray("VertexNormal");
             glDrawArrays(GL_QUADS, 0, 6*4);
+            quadShaderProgram.disableAttributeArray("VertexPosition");
+            quadShaderProgram.disableAttributeArray("VertexNormal");
         }
     }
 }
@@ -401,14 +555,48 @@ void GLWindow::drawTrees()
 void GLWindow::drawHouses()
 {
     for (const auto &house : houses) {
-        quadShaderProgram.setUniformValue("objectColor", house.getHouseBaseColor());
-        quadShaderProgram.setAttributeArray("vertex", house.getHouseBase());
+        quadShaderProgram.setUniformValue("ObjectColor", house.getHouseBaseColor());
+        quadShaderProgram.setAttributeArray("VertexPosition", house.getHouseBase());
+        quadShaderProgram.setAttributeArray("VertexNormal", house.getHouseBaseNorm());
+        quadShaderProgram.enableAttributeArray("VertexPosition");
+        quadShaderProgram.enableAttributeArray("VertexNormal");
         glDrawArrays(GL_QUADS, 0, 6*4);
+        quadShaderProgram.disableAttributeArray("VertexPosition");
+        quadShaderProgram.disableAttributeArray("VertexNormal");
 
-        quadShaderProgram.setUniformValue("objectColor", house.getHouseRoofColor());
-        for (auto &roofPart : house.getHouseRoof()) {
-            quadShaderProgram.setAttributeArray("vertex", roofPart.get());
+        quadShaderProgram.setUniformValue("ObjectColor", house.getHouseRoofColor());
+        for (int i = 0; i < house.getHouseRoof().size(); i++) {
+            quadShaderProgram.setAttributeArray("VertexPosition", house.getHouseRoof()[i].get());
+            quadShaderProgram.setAttributeArray("VertexNormal", house.getHouseRoofNorm()[i].get());
+            quadShaderProgram.enableAttributeArray("VertexPosition");
+            quadShaderProgram.enableAttributeArray("VertexNormal");
             glDrawArrays(GL_QUADS, 0, 6*4);
+            quadShaderProgram.disableAttributeArray("VertexPosition");
+            quadShaderProgram.disableAttributeArray("VertexNormal");
         }
+    }
+}
+
+void GLWindow::drawLamps()
+{
+    for (const auto &lamp : lamps) {
+        quadShaderProgram.setUniformValue("ObjectColor", lamp.getPoleColor());
+        quadShaderProgram.setAttributeArray("VertexPosition", lamp.getPole());
+        quadShaderProgram.setAttributeArray("VertexNormal", lamp.getPoleNorm());
+        quadShaderProgram.enableAttributeArray("VertexPosition");
+        quadShaderProgram.enableAttributeArray("VertexNormal");
+        glDrawArrays(GL_QUADS, 0, 6*4);
+        quadShaderProgram.disableAttributeArray("VertexPosition");
+        quadShaderProgram.disableAttributeArray("VertexNormal");
+
+
+        quadShaderProgram.setUniformValue("ObjectColor", lamp.getHeadColor());
+        quadShaderProgram.setAttributeArray("VertexPosition", lamp.getHead());
+        quadShaderProgram.setAttributeArray("VertexNormal", lamp.getHeadNorm());
+        quadShaderProgram.enableAttributeArray("VertexPosition");
+        quadShaderProgram.enableAttributeArray("VertexNormal");
+        glDrawArrays(GL_QUADS, 0, 6*4);
+        quadShaderProgram.disableAttributeArray("VertexPosition");
+        quadShaderProgram.disableAttributeArray("VertexNormal");
     }
 }
