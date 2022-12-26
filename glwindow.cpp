@@ -44,6 +44,13 @@ void getQuadVertices(QVector3D *vertices, float width, float length, float heigh
     vertices[23] = { x - hw, y - hl, z + hh };
 }
 
+void getQuadTextureCoord(QVector2D *textureCoord)
+{
+    for (int i = 0; i < 24; i++) {
+        textureCoord[i] = {(float)(i % 4 == 2 || i % 4 == 3), (float)(i % 4 == 1 || i % 4 == 2)};
+    }
+}
+
 void getNormals(QVector3D *vertices, QVector3D *norms) {
     for (int i = 0; i < 24; i++)
         norms[i] = vertices[i].normalized();
@@ -52,7 +59,12 @@ void getNormals(QVector3D *vertices, QVector3D *norms) {
 Tree::Tree(int type, float width, float length, float height, float x, float y, float z)
     : type(type)
 {
-    treeTruncColor = QVector3D(74.0/255.0, 53.0/255.0, 42.0/255.0);
+    treeTruncTexture = std::make_unique<QOpenGLTexture>(QImage(":/textures/textures/Wood_11-512x512.png").mirrored());
+    treeTruncTexture->setMinificationFilter(QOpenGLTexture::Nearest);
+    treeTruncTexture->setMagnificationFilter(QOpenGLTexture::Linear);
+    treeTruncTexture->setWrapMode(QOpenGLTexture::Repeat);
+    treeTruncTextureCoord = std::make_unique<QVector2D[]>(24);
+    getQuadTextureCoord(treeTruncTextureCoord.get());
 
     treeTrunc = std::make_unique<QVector3D[]>(24);
     treeTruncNorm = std::make_unique<QVector3D[]>(24);
@@ -66,7 +78,13 @@ Tree::Tree(int type, float width, float length, float height, float x, float y, 
 
     switch (type) {
     case 1:
-        treeLeavesColor = QVector3D(148.0/255.0, 124.0/255.0, 27.0/255.0);
+        treeLeavesTexture = std::make_unique<QOpenGLTexture>(QImage(":/textures/textures/foliage1.jpg").mirrored());
+        treeLeavesTexture->setMinificationFilter(QOpenGLTexture::Nearest);
+        treeLeavesTexture->setMagnificationFilter(QOpenGLTexture::Linear);
+        treeLeavesTexture->setWrapMode(QOpenGLTexture::Repeat);
+        treeLeavesTextureCoord = std::make_unique<QVector2D[]>(24);
+        getQuadTextureCoord(treeLeavesTextureCoord.get());
+
         treeLeaves.push_back(std::make_unique<QVector3D[]>(24));
         treeLeavesNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(treeLeaves[treeLeaves.size() - 1].get(), width, length, height / 2, x, y, z + height / 4);
@@ -74,7 +92,13 @@ Tree::Tree(int type, float width, float length, float height, float x, float y, 
         break;
 
     case 2:
-        treeLeavesColor = QVector3D(40.0/255.0, 80.0/255.0, 25.0/255.0);
+        treeLeavesTexture = std::make_unique<QOpenGLTexture>(QImage(":/textures/textures/foliage2.jpg").mirrored());
+        treeLeavesTexture->setMinificationFilter(QOpenGLTexture::Nearest);
+        treeLeavesTexture->setMagnificationFilter(QOpenGLTexture::Linear);
+        treeLeavesTexture->setWrapMode(QOpenGLTexture::Repeat);
+        treeLeavesTextureCoord = std::make_unique<QVector2D[]>(24);
+        getQuadTextureCoord(treeLeavesTextureCoord.get());
+
         treeLeaves.push_back(std::make_unique<QVector3D[]>(24));
         treeLeavesNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(treeLeaves[treeLeaves.size() - 1].get(), width, length, 3 * height / 4, x, y, z + height / 8);
@@ -82,7 +106,13 @@ Tree::Tree(int type, float width, float length, float height, float x, float y, 
         break;
 
     case 3:
-        treeLeavesColor = QVector3D(20.0/255.0, 35.0/255.0, 20.0/255.0);
+        treeLeavesTexture = std::make_unique<QOpenGLTexture>(QImage(":/textures/textures/foliage3.jpg").mirrored());
+        treeLeavesTexture->setMinificationFilter(QOpenGLTexture::Nearest);
+        treeLeavesTexture->setMagnificationFilter(QOpenGLTexture::Linear);
+        treeLeavesTexture->setWrapMode(QOpenGLTexture::Repeat);
+        treeLeavesTextureCoord = std::make_unique<QVector2D[]>(24);
+        getQuadTextureCoord(treeLeavesTextureCoord.get());
+
         treeLeaves.push_back(std::make_unique<QVector3D[]>(24));
         treeLeavesNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(treeLeaves[treeLeaves.size() - 1].get(), width, length, height / 6, x, y, z + 5 * height / 12);
@@ -108,13 +138,25 @@ House::House(int type, float width, float length, float height, float x, float y
 {
     switch (type) {
     case 1:
+        houseBaseTexture = std::make_unique<QOpenGLTexture>(QImage(":/textures/textures/Bricks_19-512x512.png").mirrored());
+        houseBaseTexture->setMinificationFilter(QOpenGLTexture::Nearest);
+        houseBaseTexture->setMagnificationFilter(QOpenGLTexture::Linear);
+        houseBaseTexture->setWrapMode(QOpenGLTexture::Repeat);
+        houseBaseTextureCoord = std::make_unique<QVector2D[]>(24);
+        getQuadTextureCoord(houseBaseTextureCoord.get());
+
         houseBase = std::make_unique<QVector3D[]>(24);
         houseBaseNorm = std::make_unique<QVector3D[]>(24);
         getQuadVertices(houseBase.get(), width, length, 3 * height / 4, x, y, z - height / 8);
         getNormals(houseBase.get(), houseBaseNorm.get());
-        houseBaseColor = QVector3D(65.0/255.0, 65.0/255.0, 70.0/255.0);
 
-        houseRoofColor = QVector3D(94.0/255.0, 94.0/255.0, 102.0/255.0);
+        houseRoofTexture = std::make_unique<QOpenGLTexture>(QImage(":/textures/textures/Bricks_01-512x512.png").mirrored());
+        houseRoofTexture->setMinificationFilter(QOpenGLTexture::Nearest);
+        houseRoofTexture->setMagnificationFilter(QOpenGLTexture::Linear);
+        houseRoofTexture->setWrapMode(QOpenGLTexture::Repeat);
+        houseRoofTextureCoord = std::make_unique<QVector2D[]>(24);
+        getQuadTextureCoord(houseRoofTextureCoord.get());
+
         houseRoof.push_back(std::make_unique<QVector3D[]>(24));
         houseRoofNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(houseRoof[houseRoof.size() - 1].get(), width / 4, length / 4, height / 8,
@@ -158,12 +200,25 @@ House::House(int type, float width, float length, float height, float x, float y
         break;
 
     case 2:
+        houseBaseTexture = std::make_unique<QOpenGLTexture>(QImage(":/textures/textures/Bricks_14-512x512.png").mirrored());
+        houseBaseTexture->setMinificationFilter(QOpenGLTexture::Nearest);
+        houseBaseTexture->setMagnificationFilter(QOpenGLTexture::Linear);
+        houseBaseTexture->setWrapMode(QOpenGLTexture::Repeat);
+        houseBaseTextureCoord = std::make_unique<QVector2D[]>(24);
+        getQuadTextureCoord(houseBaseTextureCoord.get());
+
         houseBase = std::make_unique<QVector3D[]>(24);
         houseBaseNorm = std::make_unique<QVector3D[]>(24);
         getQuadVertices(houseBase.get(), width, length, 5 * height / 8, x, y, z - 3 * height / 16);
         getNormals(houseBase.get(), houseBaseNorm.get());
-        houseBaseColor = QVector3D(225.0/255.0, 215.0/255.0, 155.0/255.0);
-        houseRoofColor = QVector3D(195.0/255.0, 55.0/255.0, 55.0/255.0);
+
+        houseRoofTexture = std::make_unique<QOpenGLTexture>(QImage(":/textures/textures/Roofs_22-512x512.png").mirrored());
+        houseRoofTexture->setMinificationFilter(QOpenGLTexture::Nearest);
+        houseRoofTexture->setMagnificationFilter(QOpenGLTexture::Linear);
+        houseRoofTexture->setWrapMode(QOpenGLTexture::Repeat);
+        houseRoofTextureCoord = std::make_unique<QVector2D[]>(24);
+        getQuadTextureCoord(houseRoofTextureCoord.get());
+
         houseRoof.push_back(std::make_unique<QVector3D[]>(24));
         houseRoofNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(houseRoof[houseRoof.size() - 1].get(), width, length, height / 8,
@@ -182,12 +237,25 @@ House::House(int type, float width, float length, float height, float x, float y
         break;
 
     case 3:
+        houseBaseTexture = std::make_unique<QOpenGLTexture>(QImage(":/textures/textures/Bricks_19-512x512.png").mirrored());
+        houseBaseTexture->setMinificationFilter(QOpenGLTexture::Nearest);
+        houseBaseTexture->setMagnificationFilter(QOpenGLTexture::Linear);
+        houseBaseTexture->setWrapMode(QOpenGLTexture::Repeat);
+        houseBaseTextureCoord = std::make_unique<QVector2D[]>(24);
+        getQuadTextureCoord(houseBaseTextureCoord.get());
+
         houseBase = std::make_unique<QVector3D[]>(24);
         houseBaseNorm = std::make_unique<QVector3D[]>(24);
         getQuadVertices(houseBase.get(), width, length, 3 * height / 4, x, y, z - height / 8);
         getNormals(houseBase.get(), houseBaseNorm.get());
-        houseBaseColor = QVector3D(65.0/255.0, 65.0/255.0, 70.0/255.0);
-        houseRoofColor = QVector3D(94.0/255.0, 94.0/255.0, 102.0/255.0);
+
+        houseRoofTexture = std::make_unique<QOpenGLTexture>(QImage(":/textures/textures/Bricks_01-512x512.png").mirrored());
+        houseRoofTexture->setMinificationFilter(QOpenGLTexture::Nearest);
+        houseRoofTexture->setMagnificationFilter(QOpenGLTexture::Linear);
+        houseRoofTexture->setWrapMode(QOpenGLTexture::Repeat);
+        houseRoofTextureCoord = std::make_unique<QVector2D[]>(24);
+        getQuadTextureCoord(houseRoofTextureCoord.get());
+
         houseRoof.push_back(std::make_unique<QVector3D[]>(24));
         houseRoofNorm.push_back(std::make_unique<QVector3D[]>(24));
         getQuadVertices(houseRoof[houseRoof.size() - 1].get(), width, length / 4, height / 8,
@@ -209,13 +277,25 @@ House::House(int type, float width, float length, float height, float x, float y
 
 Lamp::Lamp(float width, float length, float height, float x, float y, float z)
 {
-    poleColor = QVector3D(0.0/255.0, 0.0/255.0, 0.0/255.0);
+    poleTexture = std::make_unique<QOpenGLTexture>(QImage(":/textures/textures/Metal_18-512x512.png").mirrored());
+    poleTexture->setMinificationFilter(QOpenGLTexture::Nearest);
+    poleTexture->setMagnificationFilter(QOpenGLTexture::Linear);
+    poleTexture->setWrapMode(QOpenGLTexture::Repeat);
+    poleTextureCoord = std::make_unique<QVector2D[]>(24);
+    getQuadTextureCoord(poleTextureCoord.get());
+
     pole = std::make_unique<QVector3D[]>(24);
     poleNorm = std::make_unique<QVector3D[]>(24);
     getQuadVertices(pole.get(), width / 3, length / 3, height - height / 3, x, y, z - height / 6);
     getNormals(pole.get(), poleNorm.get());
 
-    headColor = QVector3D(220.0/255.0, 215.0/255.0, 90.0/255.0);
+    headTexture = std::make_unique<QOpenGLTexture>(QImage(":/textures/textures/lamp.jpg").mirrored());
+    headTexture->setMinificationFilter(QOpenGLTexture::Nearest);
+    headTexture->setMagnificationFilter(QOpenGLTexture::Linear);
+    headTexture->setWrapMode(QOpenGLTexture::Repeat);
+    headTextureCoord = std::make_unique<QVector2D[]>(24);
+    getQuadTextureCoord(headTextureCoord.get());
+
     head = std::make_unique<QVector3D[]>(24);
     headNorm = std::make_unique<QVector3D[]>(24);
     getQuadVertices(head.get(), width, length, height / 3, x, y, z + height / 3);
@@ -451,8 +531,17 @@ void GLWindow::initShader()
     quadShaderProgram.setUniformValue("Ka", 0.1, 0.1, 0.1);
     quadShaderProgram.setUniformValue("Ks", 1.0, 1.0, 1.0);
     quadShaderProgram.setUniformValue("Shininess", 180.0f);
-}
 
+    quadShaderProgram.setUniformValue("tex", 0);
+
+    // Текстура платформы
+    platformTexture = std::make_unique<QOpenGLTexture>(QImage(":/textures/textures/Grass_13-512x512.png").mirrored());
+    platformTexture->setMinificationFilter(QOpenGLTexture::Nearest);
+    platformTexture->setMagnificationFilter(QOpenGLTexture::Linear);
+    platformTexture->setWrapMode(QOpenGLTexture::Repeat);
+    platformTextureCoord = std::make_unique<QVector2D[]>(24);
+    getQuadTextureCoord(platformTextureCoord.get());
+}
 
 GLWindow::GLWindow()
 {
@@ -468,6 +557,9 @@ GLWindow::GLWindow()
 
 GLWindow::~GLWindow()
 {
+    makeCurrent();
+    platformTexture.reset();
+    doneCurrent();
 }
 
 void GLWindow::initializeGL()
@@ -517,37 +609,46 @@ void GLWindow::paintGL()
 
 void GLWindow::drawPlatform()
 {
-    quadShaderProgram.setUniformValue("ObjectColor", platformColor);
+    platformTexture->bind();
     quadShaderProgram.setAttributeArray("VertexPosition", platform.get());
     quadShaderProgram.setAttributeArray("VertexNormal", platformNorm.get());
+    quadShaderProgram.setAttributeArray("VertexTexCoord", platformTextureCoord.get());
     quadShaderProgram.enableAttributeArray("VertexPosition");
     quadShaderProgram.enableAttributeArray("VertexNormal");
+    quadShaderProgram.enableAttributeArray("VertexTexCoord");
     glDrawArrays(GL_QUADS, 0, 6*4);
     quadShaderProgram.disableAttributeArray("VertexPosition");
     quadShaderProgram.disableAttributeArray("VertexNormal");
+    quadShaderProgram.disableAttributeArray("VertexTexCoord");
 }
 
 void GLWindow::drawTrees()
 {
     for (const auto &tree : trees) {
-        quadShaderProgram.setUniformValue("ObjectColor", tree.getTreeTruncColor());
+        tree.getTreeTruncTexture()->bind();
         quadShaderProgram.setAttributeArray("VertexPosition", tree.getTreeTrunc());
         quadShaderProgram.setAttributeArray("VertexNormal", tree.getTreeTruncNorm());
+        quadShaderProgram.setAttributeArray("VertexTexCoord", tree.getTreeTruncTextureCoord());
         quadShaderProgram.enableAttributeArray("VertexPosition");
         quadShaderProgram.enableAttributeArray("VertexNormal");
+        quadShaderProgram.enableAttributeArray("VertexTexCoord");
         glDrawArrays(GL_QUADS, 0, 6*4);
         quadShaderProgram.disableAttributeArray("VertexPosition");
         quadShaderProgram.disableAttributeArray("VertexNormal");
+        quadShaderProgram.disableAttributeArray("VertexTexCoord");
 
-        quadShaderProgram.setUniformValue("ObjectColor", tree.getTreeLeavesColor());
+        tree.getTreeLeavesTexture()->bind();
+        quadShaderProgram.setAttributeArray("VertexTexCoord", tree.getTreeLeavesTextureCoord());
         for (int i = 0; i < tree.getTreeLeaves().size(); i++) {
             quadShaderProgram.setAttributeArray("VertexPosition", tree.getTreeLeaves()[i].get());
             quadShaderProgram.setAttributeArray("VertexNormal", tree.getTreeLeavesNorm()[i].get());
             quadShaderProgram.enableAttributeArray("VertexPosition");
             quadShaderProgram.enableAttributeArray("VertexNormal");
+            quadShaderProgram.enableAttributeArray("VertexTexCoord");
             glDrawArrays(GL_QUADS, 0, 6*4);
             quadShaderProgram.disableAttributeArray("VertexPosition");
             quadShaderProgram.disableAttributeArray("VertexNormal");
+            quadShaderProgram.disableAttributeArray("VertexTexCoord");
         }
     }
 }
@@ -555,24 +656,30 @@ void GLWindow::drawTrees()
 void GLWindow::drawHouses()
 {
     for (const auto &house : houses) {
-        quadShaderProgram.setUniformValue("ObjectColor", house.getHouseBaseColor());
+        house.getHouseBaseTexture()->bind();
         quadShaderProgram.setAttributeArray("VertexPosition", house.getHouseBase());
         quadShaderProgram.setAttributeArray("VertexNormal", house.getHouseBaseNorm());
+        quadShaderProgram.setAttributeArray("VertexTexCoord", house.getHouseBaseTextureCoord());
         quadShaderProgram.enableAttributeArray("VertexPosition");
         quadShaderProgram.enableAttributeArray("VertexNormal");
+        quadShaderProgram.enableAttributeArray("VertexTexCoord");
         glDrawArrays(GL_QUADS, 0, 6*4);
         quadShaderProgram.disableAttributeArray("VertexPosition");
         quadShaderProgram.disableAttributeArray("VertexNormal");
+        quadShaderProgram.disableAttributeArray("VertexTexCoord");
 
-        quadShaderProgram.setUniformValue("ObjectColor", house.getHouseRoofColor());
+        house.getHouseRoofTexture()->bind();
+        quadShaderProgram.setAttributeArray("VertexTexCoord", house.getHouseRoofTextureCoord());
         for (int i = 0; i < house.getHouseRoof().size(); i++) {
             quadShaderProgram.setAttributeArray("VertexPosition", house.getHouseRoof()[i].get());
             quadShaderProgram.setAttributeArray("VertexNormal", house.getHouseRoofNorm()[i].get());
             quadShaderProgram.enableAttributeArray("VertexPosition");
             quadShaderProgram.enableAttributeArray("VertexNormal");
+            quadShaderProgram.enableAttributeArray("VertexTexCoord");
             glDrawArrays(GL_QUADS, 0, 6*4);
             quadShaderProgram.disableAttributeArray("VertexPosition");
             quadShaderProgram.disableAttributeArray("VertexNormal");
+            quadShaderProgram.disableAttributeArray("VertexTexCoord");
         }
     }
 }
@@ -580,23 +687,28 @@ void GLWindow::drawHouses()
 void GLWindow::drawLamps()
 {
     for (const auto &lamp : lamps) {
-        quadShaderProgram.setUniformValue("ObjectColor", lamp.getPoleColor());
+        lamp.getPoleTexture()->bind();
         quadShaderProgram.setAttributeArray("VertexPosition", lamp.getPole());
         quadShaderProgram.setAttributeArray("VertexNormal", lamp.getPoleNorm());
+        quadShaderProgram.setAttributeArray("VertexTexCoord", lamp.getPoleTextureCoord());
         quadShaderProgram.enableAttributeArray("VertexPosition");
         quadShaderProgram.enableAttributeArray("VertexNormal");
+        quadShaderProgram.enableAttributeArray("VertexTexCoord");
         glDrawArrays(GL_QUADS, 0, 6*4);
         quadShaderProgram.disableAttributeArray("VertexPosition");
         quadShaderProgram.disableAttributeArray("VertexNormal");
+        quadShaderProgram.disableAttributeArray("VertexTexCoord");
 
-
-        quadShaderProgram.setUniformValue("ObjectColor", lamp.getHeadColor());
+        lamp.getHeadTexture()->bind();
         quadShaderProgram.setAttributeArray("VertexPosition", lamp.getHead());
         quadShaderProgram.setAttributeArray("VertexNormal", lamp.getHeadNorm());
+        quadShaderProgram.setAttributeArray("VertexTexCoord", lamp.getHeadTextureCoord());
         quadShaderProgram.enableAttributeArray("VertexPosition");
         quadShaderProgram.enableAttributeArray("VertexNormal");
+        quadShaderProgram.enableAttributeArray("VertexTexCoord");
         glDrawArrays(GL_QUADS, 0, 6*4);
         quadShaderProgram.disableAttributeArray("VertexPosition");
         quadShaderProgram.disableAttributeArray("VertexNormal");
+        quadShaderProgram.disableAttributeArray("VertexTexCoord");
     }
 }

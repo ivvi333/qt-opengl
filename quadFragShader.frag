@@ -3,10 +3,9 @@
 
 in vec3 Position;
 in vec3 Normal;
+in vec2 TexCoord;
 
-uniform vec3 ObjectColor;
-
-out vec4 FragColor;
+uniform sampler2D tex;
 
 struct LightInfo
 {
@@ -24,7 +23,9 @@ uniform vec3 Ka;
 uniform vec3 Ks;
 uniform float Shininess;
 
-vec3 ads(int lightIndex, vec3 position, vec3 norm)
+out vec4 FragColor;
+
+void ads(int lightIndex, vec3 position, vec3 norm, out vec3 ambAndDiff, out vec3 spec)
 {
     vec3 s = normalize(lights[lightIndex].Position - position);
     vec3 v = normalize(-position);
@@ -32,14 +33,15 @@ vec3 ads(int lightIndex, vec3 position, vec3 norm)
     float distance = length(lights[lightIndex].Position - position);
     float attenuation = 1.0 / (lights[lightIndex].constant + lights[lightIndex].linear * distance +
                                lights[lightIndex].quadratic * (distance * distance));
-    return attenuation * lights[lightIndex].Intensity *
-           (Ka + Kd * max(dot(s, norm), 0.0) + Ks * pow(max(dot(r,v), 0.0), Shininess));
+    ambAndDiff += attenuation * lights[lightIndex].Intensity * (Ka + Kd * max(dot(s, norm), 0.0));
+    spec += attenuation * lights[lightIndex].Intensity * Ks * pow(max(dot(r,v), 0.0), Shininess);
 }
 
 void main(void)
 {
-    vec3 Color = vec3(0.0);
+    vec3 ambAndDiff = vec3(0.0), spec = vec3(0.0);
+    vec4 texColor = texture(tex, TexCoord);
     for(int i = 0; i < LightCount; i++)
-        Color += ads(i, Position, Normal);
-    FragColor = vec4(ObjectColor * Color, 1.0);
+        ads(i, Position, Normal, ambAndDiff, spec);
+    FragColor = vec4(ambAndDiff, 1.0) * texColor + vec4(spec, 1.0);
 }

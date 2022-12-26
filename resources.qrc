@@ -1,6 +1,19 @@
 <RCC>
-    <qresource prefix="/" lang="GLSL">
+    <qresource lang="GLSL" prefix="/">
         <file>quadFragShader.frag</file>
         <file>quadVertShader.vert</file>
+    </qresource>
+    <qresource prefix="/textures">
+        <file>textures/Bricks_01-512x512.png</file>
+        <file>textures/Bricks_14-512x512.png</file>
+        <file>textures/Bricks_19-512x512.png</file>
+        <file>textures/foliage1.jpg</file>
+        <file>textures/foliage2.jpg</file>
+        <file>textures/foliage3.jpg</file>
+        <file>textures/Grass_13-512x512.png</file>
+        <file>textures/lamp.jpg</file>
+        <file>textures/Metal_18-512x512.png</file>
+        <file>textures/Roofs_22-512x512.png</file>
+        <file>textures/Wood_11-512x512.png</file>
     </qresource>
 </RCC>

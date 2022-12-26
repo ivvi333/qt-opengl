@@ -1,10 +1,11 @@
 #ifndef GLWINDOW_H
 #define GLWINDOW_H
 
+#include <QMatrix4x4>
 #include <QOpenGLWindow>
 #include <QOpenGLFunctions>
-#include <QMatrix4x4>
 #include <QOpenGLShaderProgram>
+#include <QOpenGLTexture>
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QKeyEvent>
@@ -13,43 +14,60 @@
 
 class Tree {
     std::unique_ptr<QVector3D[]> treeTrunc, treeTruncNorm;
-    QVector3D treeTruncColor;
+    std::unique_ptr<QOpenGLTexture> treeTruncTexture;
+    std::unique_ptr<QVector2D[]> treeTruncTextureCoord;
+
     std::vector<std::unique_ptr<QVector3D[]>> treeLeaves, treeLeavesNorm;
-    QVector3D treeLeavesColor;
+    std::unique_ptr<QOpenGLTexture> treeLeavesTexture;
+    std::unique_ptr<QVector2D[]> treeLeavesTextureCoord;
+
     int type;
 
 public:
     Tree(int type, float width, float length, float height, float x, float y, float z);
     QVector3D* getTreeTrunc() const { return treeTrunc.get(); }
     QVector3D* getTreeTruncNorm() const { return treeTruncNorm.get(); }
-    QVector3D getTreeTruncColor() const { return treeTruncColor; }
+    QOpenGLTexture* getTreeTruncTexture() const { return treeTruncTexture.get(); }
+    QVector2D* getTreeTruncTextureCoord() const { return treeTruncTextureCoord.get(); }
+
     std::vector<std::unique_ptr<QVector3D[]>> const& getTreeLeaves() const { return treeLeaves; }
     std::vector<std::unique_ptr<QVector3D[]>> const& getTreeLeavesNorm() const { return treeLeavesNorm; }
-    QVector3D getTreeLeavesColor() const { return treeLeavesColor; }
+    QOpenGLTexture* getTreeLeavesTexture() const { return treeLeavesTexture.get(); }
+    QVector2D* getTreeLeavesTextureCoord() const { return treeLeavesTextureCoord.get(); }
 };
 
 class House {
     std::unique_ptr<QVector3D[]> houseBase, houseBaseNorm;
-    QVector3D houseBaseColor;
+    std::unique_ptr<QOpenGLTexture> houseBaseTexture;
+    std::unique_ptr<QVector2D[]> houseBaseTextureCoord;
+
     std::vector<std::unique_ptr<QVector3D[]>> houseRoof, houseRoofNorm;
-    QVector3D houseRoofColor;
+    std::unique_ptr<QOpenGLTexture> houseRoofTexture;
+    std::unique_ptr<QVector2D[]> houseRoofTextureCoord;
+
     int type;
 
 public:
     House(int type, float width, float length, float height, float x, float y, float z);
     QVector3D* getHouseBase() const { return houseBase.get(); }
     QVector3D* getHouseBaseNorm() const { return houseBaseNorm.get(); }
-    QVector3D getHouseBaseColor() const { return houseBaseColor; }
+    QOpenGLTexture* getHouseBaseTexture() const { return houseBaseTexture.get(); }
+    QVector2D* getHouseBaseTextureCoord() const { return houseBaseTextureCoord.get(); }
+
     std::vector<std::unique_ptr<QVector3D[]>> const& getHouseRoof() const { return houseRoof; }
     std::vector<std::unique_ptr<QVector3D[]>> const& getHouseRoofNorm() const { return houseRoofNorm; }
-    QVector3D getHouseRoofColor() const { return houseRoofColor; }
+    QOpenGLTexture* getHouseRoofTexture() const { return houseRoofTexture.get(); }
+    QVector2D* getHouseRoofTextureCoord() const { return houseRoofTextureCoord.get(); }
 };
 
 class Lamp {
     std::unique_ptr<QVector3D[]> pole, poleNorm;
-    QVector3D poleColor;
+    std::unique_ptr<QOpenGLTexture> poleTexture;
+    std::unique_ptr<QVector2D[]> poleTextureCoord;
+
     std::unique_ptr<QVector3D[]> head, headNorm;
-    QVector3D headColor;
+    std::unique_ptr<QOpenGLTexture> headTexture;
+    std::unique_ptr<QVector2D[]> headTextureCoord;
 
     QVector3D getCenter(QVector3D *vertices, int size) const;
 
@@ -58,11 +76,14 @@ public:
     QVector3D* getPole() const { return pole.get(); }
     QVector3D* getPoleNorm() const { return poleNorm.get(); }
     QVector3D getPoleCenter() const { return getCenter(pole.get(), 24); }
-    QVector3D getPoleColor() const { return poleColor; }
+    QOpenGLTexture* getPoleTexture() const { return poleTexture.get(); }
+    QVector2D* getPoleTextureCoord() const { return poleTextureCoord.get(); }
+
     QVector3D* getHead() const { return head.get(); }
     QVector3D* getHeadNorm() const { return headNorm.get(); }
     QVector3D getHeadCenter() const { return getCenter(head.get(), 24); }
-    QVector3D getHeadColor() const { return headColor; }
+    QOpenGLTexture* getHeadTexture() const { return headTexture.get(); }
+    QVector2D* getHeadTextureCoord() const { return headTextureCoord.get(); }
 };
 
 class GLWindow : public QOpenGLWindow, protected QOpenGLFunctions
@@ -78,13 +99,14 @@ class GLWindow : public QOpenGLWindow, protected QOpenGLFunctions
 
     QOpenGLShaderProgram quadShaderProgram;
 
-    const QVector3D platformColor = QVector3D(200.0/255.0, 210.0/255.0, 195.0/255.0);
-    const float platformW = 10000.0, platformL = platformW, platformH = 10.0;
+    std::unique_ptr<QOpenGLTexture> platformTexture;
+    std::unique_ptr<QVector2D[]> platformTextureCoord;
+    const float platformW = 1000.0, platformL = platformW, platformH = 10.0;
     std::unique_ptr<QVector3D[]> platform, platformNorm;
     const float cellW = 50.0, cellL = cellW;
     std::vector<std::pair<int, int>> freeCells;
 
-    float zoffset = platformW / 32.0;
+    float zoffset = platformW / 8.0;
 
     std::vector<House> houses;
     std::vector<Tree> trees;
