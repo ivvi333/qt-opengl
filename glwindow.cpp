@@ -558,8 +558,6 @@ GLWindow::GLWindow()
 GLWindow::~GLWindow()
 {
     makeCurrent();
-    platformTexture.reset();
-    doneCurrent();
 }
 
 void GLWindow::initializeGL()
